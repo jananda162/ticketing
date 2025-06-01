@@ -85,9 +85,9 @@ elseif ($action === 'admin_update_ticket' && $_SERVER['REQUEST_METHOD'] === 'POS
 }
 elseif ($action === 'admin_all_tickets') {
     Session::requireRole(['Super Admin']);
-    echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><title>All Tickets</title><link rel='stylesheet' href='css/style.css'></head><body>";
-    echo "<div class='container'><h1>Super Admin - All Tickets View</h1><p>This feature is under development. This page will show all tickets across all branches with filtering options.</p><p><a href='index.php?action=dashboard'>Dashboard</a> | <a href='index.php?action=logout'>Logout</a></p></div>";
-    echo "</body></html>";
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->listAllTickets();
 }
 elseif ($action === 'admin_create_ticket_for_user') {
     Session::requireRole(['Branch Admin', 'Super Admin']);
@@ -114,48 +114,178 @@ elseif ($action === 'system_reports') { // Placeholder for Super Admin reports
     $controller = new ReportController();
     $controller->systemWideReports();
 }
+
+
+// Super Admin - Manage Issue Types
+elseif ($action === 'manage_issue_types') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->listIssueTypes();
+}
+elseif ($action === 'create_issue_type_form') { // Show form for new
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->showIssueTypeForm('create');
+}
+elseif ($action === 'create_issue_type' && $_SERVER['REQUEST_METHOD'] === 'POST') { // Handle creation
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->createIssueType();
+}
+elseif ($action === 'edit_issue_type_form') { // Show form for edit
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    // ID will be passed as GET param: e.g., &id=123
+    $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    if (!$id) { header("Location: index.php?action=manage_issue_types&error_message=Invalid+ID."); exit; }
+    $controller->showIssueTypeForm('edit', $id);
+}
+elseif ($action === 'update_issue_type' && $_SERVER['REQUEST_METHOD'] === 'POST') { // Handle update
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->updateIssueType();
+}
+elseif ($action === 'delete_issue_type' && $_SERVER['REQUEST_METHOD'] === 'POST') { // Handle delete
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->deleteIssueType();
+}
+
+// Super Admin - Manage Departments
+elseif ($action === 'manage_departments') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->listDepartments();
+}
+elseif ($action === 'create_department_form') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->showDepartmentForm('create');
+}
+elseif ($action === 'create_department' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->createDepartment();
+}
+elseif ($action === 'edit_department_form') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    if (!$id) { header("Location: index.php?action=manage_departments&error_message=Invalid+ID."); exit; }
+    $controller->showDepartmentForm('edit', $id);
+}
+elseif ($action === 'update_department' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->updateDepartment();
+}
+elseif ($action === 'delete_department' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->deleteDepartment();
+}
+
+// Super Admin - Manage Users
+elseif ($action === 'manage_users') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->listUsers();
+}
+elseif ($action === 'create_user_form') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->showUserForm('create');
+}
+elseif ($action === 'create_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->createUser();
+}
+elseif ($action === 'edit_user_form') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    if (!$id) { header("Location: index.php?action=manage_users&error_message=Invalid+User+ID."); exit; }
+    $controller->showUserForm('edit', $id);
+}
+elseif ($action === 'update_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->updateUser();
+}
+elseif ($action === 'delete_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    Session::requireRole(['Super Admin']);
+    require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+    $controller = new SuperAdminController();
+    $controller->deleteUser();
+}
+
 // Dashboard
 elseif ($action === 'dashboard') {
     Session::requireLogin();
     $userRole = Session::getCurrentUserRole();
-    $username = Session::get('username');
-    $userBranch = Session::getCurrentUserBranch();
-
-    echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><title>Dashboard</title><link rel='stylesheet' href='css/style.css'></head><body>";
-    echo "<div class='container'>";
-    echo "<h1>Welcome to your Dashboard, " . htmlspecialchars($username) . "!</h1>";
-    echo "<p>Your Role: " . htmlspecialchars($userRole) . "</p>";
-    if ($userBranch) {
-         echo "<p>Your Branch: " . htmlspecialchars($userBranch) . "</p>";
-    }
-
-    echo "<h3>Navigation</h3><ul>";
-    if (in_array($userRole, ['User', 'Branch Admin', 'Super Admin'])) {
-        echo '<li><a href="index.php?action=create_ticket">Submit My Own Ticket</a></li>';
-    }
 
     if ($userRole === 'User') {
-        echo '<li><a href="index.php?action=view_my_tickets">View My Tickets</a></li>';
-    } elseif ($userRole === 'Branch Admin') {
-        echo '<li><a href="index.php?action=admin_branch_tickets">View Branch Tickets</a></li>';
-        echo '<li><a href="index.php?action=admin_create_ticket_for_user">Create Ticket for User in Branch</a></li>';
-        echo '<li><a href="index.php?action=admin_branch_reports">Branch Reports</a></li>'; // Updated
-    } elseif ($userRole === 'Super Admin') {
-        echo '<li><a href="index.php?action=admin_all_tickets">View All Tickets</a></li>';
-        echo '<li><a href="index.php?action=admin_create_ticket_for_user">Create Ticket for User</a></li>';
-        echo '<li><a href="index.php?action=manage_users">Manage Users</a> (To be implemented)</li>';
-        echo '<li><a href="index.php?action=manage_departments">Manage Departments</a> (To be implemented)</li>';
-        echo '<li><a href="index.php?action=manage_issue_types">Manage Issue Types</a> (To be implemented)</li>';
-        echo '<li><a href="index.php?action=system_reports">System-Wide Reports</a></li>'; // Updated
+        require_once __DIR__ . '/../src/controllers/UserController.php';
+        $controller = new UserController();
+        $controller->dashboard();
+        } elseif ($userRole === 'Branch Admin') {
+            require_once __DIR__ . '/../src/controllers/BranchAdminController.php';
+            $controller = new BranchAdminController();
+            $controller->dashboard();
+        } elseif ($userRole === 'Super Admin') {
+            require_once __DIR__ . '/../src/controllers/SuperAdminController.php';
+            $controller = new SuperAdminController();
+            $controller->dashboard();
+        }
+    else {
+            // Fallback for any other unforeseen role or if role is not set (though requireLogin should catch this)
+        $username = Session::get('username');
+        $userBranch = Session::getCurrentUserBranch();
+
+        echo "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><title>Dashboard</title><link rel='stylesheet' href='css/style.css'></head><body>";
+        echo "<div class='container'>";
+        echo "<h1>Welcome to your Dashboard, " . htmlspecialchars($username) . "!</h1>";
+        echo "<p>Your Role: " . htmlspecialchars($userRole) . "</p>";
+        if ($userBranch) {
+             echo "<p>Your Branch: " . htmlspecialchars($userBranch) . "</p>";
+        }
+        echo "<div class='dashboard-nav'>"; // Added class for styling
+            echo "<h3>Navigation (Default)</h3><ul class='dashboard-nav'>";
+            // Specific links for Super Admin if they land here
+            if ($userRole === 'Super Admin') {
+            echo '<li><a href="index.php?action=admin_all_tickets">View All Tickets</a></li>';
+            echo '<li><a href="index.php?action=admin_create_ticket_for_user">Create Ticket for User</a></li>';
+            echo '<li><a href="index.php?action=manage_users">Manage Users</a></li>';
+            echo '<li><a href="index.php?action=manage_departments">Manage Departments</a></li>';
+            echo '<li><a href="index.php?action=manage_issue_types">Manage Issue Types</a></li>';
+            echo '<li><a href="index.php?action=system_reports">System-Wide Reports</a></li>';
+        }
+        echo '<li><a href="index.php?action=logout">Logout</a></li>';
+        echo "</ul>";
+        echo "</div>"; // CLose dashboard-nav
+        if(isset($_GET['message'])) echo "<p class='message message-info'>" . htmlspecialchars($_GET['message']) . "</p>";
+        if(isset($_GET['error'])) echo "<p class='message message-error'>" . htmlspecialchars($_GET['error']) . "</p>";
+        if(isset($_GET['success'])) echo "<p class='message message-success'>" . htmlspecialchars($_GET['success']) . "</p>";
+        echo "</div></body></html>";
     }
-    echo '<li><a href="index.php?action=logout">Logout</a></li>';
-    echo "</ul>";
-
-    if(isset($_GET['message'])) echo "<p style='color:blue;'>" . htmlspecialchars($_GET['message']) . "</p>";
-    if(isset($_GET['error'])) echo "<p style='color:red;'>" . htmlspecialchars($_GET['error']) . "</p>";
-    if(isset($_GET['success'])) echo "<p style='color:green;'>" . htmlspecialchars($_GET['success']) . "</p>";
-
-    echo "</div></body></html>";
 }
 // Fallback for undefined actions
 elseif (Session::isLoggedIn()) {

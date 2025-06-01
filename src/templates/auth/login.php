@@ -9,7 +9,7 @@
     <div class="container">
         <h2>Login</h2>
         <?php if (isset($error)): ?>
-            <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
+            <p class="message message-error"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>
         <form action="index.php?action=login" method="POST">
             <div>
