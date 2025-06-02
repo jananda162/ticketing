@@ -294,6 +294,6 @@ elseif (Session::isLoggedIn()) {
 } else {
     require_once __DIR__ . '/../src/controllers/AuthController.php';
     $controller = new AuthController();
-    $controller->showLoginForm("Please login to continue.");
+    $controller->showLoginForm("Requested page not found or requires login. Please login to continue.");
 }
 ?>
