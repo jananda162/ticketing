@@ -1,189 +1,269 @@
-/* public/css/style.css */
+/* public/css/style.css - Enhanced Version */
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    line-height: 1.6;
+    font-family: 'Helvetica Neue', Arial, sans-serif; /* Cleaner font stack */
+    line-height: 1.65;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
+    background-color: #f8f9fa; /* Lighter grey background */
+    color: #495057; /* Softer text color */
 }
 
 .container {
-    width: 85%;
-    margin: 20px auto;
+    width: 90%;
+    max-width: 1200px; /* Max width for larger screens */
+    margin: 30px auto;
     overflow: hidden;
-    padding: 25px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Softer shadow */
 }
 
 /* --- Typography & Basic Elements --- */
 h1, h2, h3, h4 {
-    color: #333;
-    margin-bottom: 0.75em;
+    color: #343a40; /* Darker grey for headings */
+    margin-top: 0;
+    margin-bottom: 0.8em;
+    font-weight: 500; /* Slightly less bold for a modern look */
 }
-h1 { font-size: 2.2em; }
-h2 { font-size: 1.8em; }
-h3 { font-size: 1.4em; }
+h1 { font-size: 2.4em; }
+h2 { font-size: 2em; }
+h3 { font-size: 1.6em; }
+h4 { font-size: 1.2em; }
+
 
 p {
-    margin-bottom: 1em;
+    margin-bottom: 1.2em;
 }
 
 a {
-    color: #007bff; /* Bootstrap primary blue */
+    color: #007bff;
     text-decoration: none;
+    transition: color 0.2s ease-in-out;
 }
 
 a:hover {
     color: #0056b3;
-    text-decoration: underline;
+    text-decoration: none; /* Often preferred to keep no underline on hover for nav-like links */
 }
 
 /* --- Navigation --- */
 nav {
-    background-color: #343a40; /* Dark background */
-    padding: 10px 0;
-    margin-bottom: 20px;
-    border-radius: 5px;
+    background-color: #343a40; /* Dark primary */
+    padding: 12px 0; /* Slightly more padding */
+    margin-bottom: 25px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 nav ul {
     list-style-type: none;
-    padding: 0;
+    padding: 0 20px; /* Padding inside nav */
     margin: 0;
-    text-align: center;
+    text-align: left; /* Align to left for a more standard nav */
 }
 
 nav ul li {
-    display: inline;
-    margin-right: 15px;
+    display: inline-block; /* Use inline-block for better spacing control */
+    margin-right: 20px;
+}
+
+nav ul li:last-child {
+    margin-right: 0;
 }
 
 nav ul li a {
-    color: #fff;
-    font-size: 1.1em;
-    padding: 8px 12px;
+    color: #f8f9fa; /* Light text on dark nav */
+    font-size: 1.05em;
+    padding: 10px 15px;
     border-radius: 4px;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 nav ul li a:hover, nav ul li a.active {
-    background-color: #007bff;
+    background-color: #007bff; /* Primary color for hover/active */
+    color: #ffffff;
     text-decoration: none;
 }
 
 /* --- Forms --- */
 form div {
-    margin-bottom: 15px;
+    margin-bottom: 18px; /* Increased spacing */
 }
 
 label {
     display: block;
-    margin-bottom: 6px;
-    font-weight: bold;
-    color: #555;
+    margin-bottom: 8px;
+    font-weight: 600; /* Slightly bolder label */
+    color: #495057;
+    font-size: 0.95em;
 }
 
 input[type="text"],
 input[type="password"],
 input[type="email"],
 input[type="number"],
+input[type="date"], /* Added date type */
 textarea,
 select {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    padding: 10px 14px; /* Adjusted padding */
+    border: 1px solid #ced4da; /* Softer border */
+    border-radius: 6px;
     box-sizing: border-box;
     font-size: 1em;
-    transition: border-color 0.3s ease;
+    color: #495057;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 input[type="text"]:focus,
 input[type="password"]:focus,
 input[type="email"]:focus,
 input[type="number"]:focus,
+input[type="date"]:focus,
 textarea:focus,
 select:focus {
     border-color: #007bff;
     outline: none;
-    box-shadow: 0 0 5px rgba(0,123,255,0.25);
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); /* Bootstrap-like focus */
 }
 
 input[readonly] {
     background-color: #e9ecef;
-    opacity: 1;
+    cursor: not-allowed;
 }
 
-button, input[type="submit"] {
-    background-color: #28a745; /* Green for submit/success */
+/* General Button Styling */
+.button, button, input[type="submit"] {
+    display: inline-block; /* For <a> tags styled as buttons */
+    background-color: #007bff; /* Primary button color */
     color: white;
-    padding: 12px 20px;
+    padding: 10px 20px; /* Adjusted padding */
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 1.1em;
-    transition: background-color 0.3s ease;
+    font-size: 1.05em;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none; /* For <a> tags */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+}
+.button:hover, button:hover, input[type="submit"]:hover {
+    background-color: #0056b3; /* Darker shade for hover */
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-button:hover, input[type="submit"]:hover {
+/* Specific button types */
+.button-success, button.success, input[type="submit"].success { /* If we want to keep green for submit */
+    background-color: #28a745;
+}
+.button-success:hover, button.success:hover, input[type="submit"].success:hover {
     background-color: #218838;
 }
+
+.button-danger {
+    background-color: #dc3545;
+}
+.button-danger:hover {
+    background-color: #c82333;
+}
+
+.button-secondary, a.button-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+.button-secondary:hover, a.button-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Link styled as button (for delete in tables) */
+.button-link-danger {
+    background:none;
+    border:none;
+    color:#dc3545; /* Danger color */
+    cursor:pointer;
+    padding:0;
+    font-size:inherit;
+    text-decoration:underline;
+}
+.button-link-danger:hover {
+    color: #c82333;
+    text-decoration: underline;
+}
+
 
 /* --- Tables --- */
 table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+    border-collapse: separate; /* Allows for border-radius on cells if needed */
+    border-spacing: 0;
+    margin-top: 25px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px; /* Rounded corners for table */
+    overflow: hidden; /* To make border-radius work with cells */
+    box-shadow: 0 3px 6px rgba(0,0,0,0.05);
 }
 
 th, td {
-    border: 1px solid #dee2e6;
-    padding: 12px;
+    border-bottom: 1px solid #e0e0e0; /* Only bottom borders for rows */
+    padding: 14px 16px; /* Increased padding */
     text-align: left;
+    vertical-align: middle;
 }
-
 th {
-    background-color: #e9ecef; /* Light grey for headers */
-    font-weight: bold;
+    background-color: #f8f9fa; /* Very light grey for headers */
+    font-weight: 600; /* Bolder headers */
+    color: #343a40;
+    border-top: none; /* Remove top border for header cells if table has main border */
+}
+td {
     color: #495057;
 }
 
+tbody tr:last-child td {
+    border-bottom: none; /* No border for last row cells */
+}
+
 tbody tr:nth-child(odd) {
-    background-color: #f8f9fa;
+    background-color: #ffffff; /* Keep odd rows white */
+}
+tbody tr:nth-child(even) {
+    background-color: #f8f9fa; /* Light grey for even rows */
 }
 
 tbody tr:hover {
-    background-color: #e2e6ea;
+    background-color: #e9ecef; /* Slightly darker hover */
 }
 
-/* --- Feedback Messages --- */
+/* --- Feedback Messages (already good, minor tweaks) --- */
 .message {
-    padding: 15px;
-    margin-bottom: 20px;
+    padding: 1rem; /* Use rem for scalable spacing */
+    margin-bottom: 1.5rem;
     border: 1px solid transparent;
-    border-radius: 5px;
+    border-radius: .375rem; /* Softer radius */
     font-size: 1em;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 .message-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border-color: #badbcc;
 }
 .message-error {
-    color: #721c24;
+    color: #842029;
     background-color: #f8d7da;
-    border-color: #f5c6cb;
+    border-color: #f5c2c7;
 }
 .message-info {
-    color: #0c5460;
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
+    color: #055160;
+    background-color: #cff4fc;
+    border-color: #b6effb;
 }
 
-/* --- Specific page elements --- */
+/* --- Specific page elements (from previous passes, ensure they integrate) --- */
 .ticket-detail {
     margin-bottom: 20px;
     padding: 20px;
@@ -243,83 +323,146 @@ table.report-table tfoot th, table.report-table tfoot td {
     background-color: #e9ecef;
 }
 
-/* Dashboard navigation list */
-.dashboard-nav ul {
-    list-style: none;
-    padding: 0;
+/* Dashboard Enhancements */
+.dashboard-greeting { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+.dashboard-stats-grid, .dashboard-stats { /* For both grid and flex based stats */
+    display: grid; /* Standardize to grid for consistent multi-card layout */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Adjust minmax for better fit */
+    gap: 25px;
+    margin-bottom: 30px;
 }
-.dashboard-nav ul li {
-    margin-bottom: 8px;
+.stat-card {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e9ecef;
 }
-.dashboard-nav ul li a {
-    font-size: 1.1em;
-    display: block;
-    padding: 8px;
-    background-color: #e9ecef;
-    border-radius: 4px;
+.stat-card h3 {
+    margin-top: 0;
+    font-size: 1.15em; /* Slightly larger */
+    color: #5a6268; /* Softer color */
+    margin-bottom: 10px;
 }
-.dashboard-nav ul li a:hover {
+.stat-card p {
+    font-size: 2.2em; /* Larger stat number */
+    font-weight: 600; /* Bolder stat */
+    color: #007bff;
+    margin-bottom: 0;
+}
+/* Specific card background for emphasis */
+.stat-card.total { background-color: #6c757d; color:white; }
+.stat-card.total h3, .stat-card.total p { color:white; }
+
+
+.management-links { margin-bottom:30px; padding-bottom:20px; border-bottom: 1px solid #eee;}
+.management-links h3 { margin-bottom: 15px; }
+.management-links nav ul { text-align: left; padding:0; } /* Override global nav text-align */
+.management-links nav ul li { margin-right: 10px; margin-bottom:10px; /* Allow wrapping */ }
+.management-links nav ul li a {
     background-color: #007bff;
-    color: #fff;
-    text-decoration: none;
+    font-size: 1em; /* Slightly smaller for more links */
+    padding: 10px 16px;
+}
+.management-links nav ul li a:hover { background-color: #0056b3; }
+
+
+.recent-tickets h3, .recent-branch-tickets h3, .recent-system-tickets h3 {
+    margin-top: 35px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 25px;
+    color: #343a40;
 }
 
-/* --- Filter Form Specifics --- */
+/* --- Filter Form Specifics (from previous subtask, ensure it's here) --- */
 .filters-form {
     background-color: #f9f9f9;
     padding: 20px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    border: 1px solid #eee;
+    border-radius: 6px;
+    margin-bottom: 25px;
+    border: 1px solid #e0e0e0;
 }
 .filters-form h3 {
     margin-top: 0;
-    width: 100%; /* Make h3 span full width before form groups */
-    margin-bottom: 15px;
+    width: 100%;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+    color: #495057;
 }
-.filters-form .form-row { /* Optional: for grouping filter elements in rows */
+.filters-form .form-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
-    align-items: flex-end; /* Align items in a row to their bottom */
-    margin-bottom: 10px;
+    gap: 20px; /* Increased gap */
+    align-items: flex-end;
+    margin-bottom: 15px;
 }
 .filters-form .form-group {
     margin-bottom: 10px;
-    min-width: 200px;
-    vertical-align: top;
+    min-width: 220px; /* Slightly wider */
     display: flex;
     flex-direction: column;
+    flex-grow: 1; /* Allow groups to grow */
 }
 .filters-form .form-group label {
-    font-weight: normal;
-    margin-bottom:3px;
+    font-weight: 500; /* Normal weight for filter labels */
+    margin-bottom: 5px;
     font-size: 0.9em;
 }
 .filters-form select,
 .filters-form input[type="date"],
 .filters-form input[type="text"] {
     width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-    font-size:0.95em;
+    padding: 9px 12px; /* Adjusted padding */
+    font-size:0.9em;
 }
-.filters-form .actions-group { /* For Filter and Clear buttons */
+.filters-form .actions-group {
     width: 100%;
-    margin-top: 10px;
+    margin-top: 15px;
     display: flex;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
 }
 .filters-form button {
-    padding: 8px 15px;
+    padding: 9px 18px;
+    font-size: 1em; /* Consistent with other buttons */
 }
 .filters-form a.clear-filters-btn {
-    padding: 8px 15px;
+    padding: 9px 18px;
     background-color: #6c757d;
     color:white;
-    border-radius:5px;
+    border-radius:6px;
     text-decoration:none;
     height: fit-content;
     line-height: normal;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+.filters-form a.clear-filters-btn:hover {
+    background-color: #5a6268;
+}
+
+/* Ensure dashboard-nav (from index.php generic dashboard) is also styled if still in use */
+.dashboard-nav ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+.dashboard-nav ul li {
+    margin-bottom: 10px;
+}
+.dashboard-nav ul li a {
+    font-size: 1.1em;
+    display: block;
+    padding: 12px 15px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    color: #333;
+    border: 1px solid #ddd;
+}
+.dashboard-nav ul li a:hover {
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-color: #007bff;
 }
