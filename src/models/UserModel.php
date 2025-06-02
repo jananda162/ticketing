@@ -145,5 +145,27 @@ class UserModel {
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         return $stmt->execute();
     }
+
+    // --- New methods ---
+    public function getAllAdmins(): array {
+        $sql = "SELECT id, username, branch, role
+                FROM users
+                WHERE role IN ('Super Admin', 'Branch Admin')
+                ORDER BY role, username ASC";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getAdminsByBranch(string $branchName): array {
+        $sql = "SELECT id, username, role
+                FROM users
+                WHERE branch = :branch
+                AND role IN ('Super Admin', 'Branch Admin')
+                ORDER BY role, username ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':branch', $branchName);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

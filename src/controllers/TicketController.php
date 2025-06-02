@@ -2,15 +2,15 @@
 // src/controllers/TicketController.php
 require_once __DIR__ . '/../models/TicketModel.php';
 require_once __DIR__ . '/../lib/Session.php';
-require_once __DIR__ . '/../models/UserModel.php'; // Add UserModel
+require_once __DIR__ . '/../models/UserModel.php';
 
 class TicketController {
     public $ticketModel;
-    private $userModel; // Add UserModel instance
+    private $userModel;
 
     public function __construct() {
         $this->ticketModel = new TicketModel();
-        $this->userModel = new UserModel(); // Instantiate UserModel
+        $this->userModel = new UserModel();
         Session::start();
     }
 
@@ -49,7 +49,7 @@ class TicketController {
         Session::requireLogin();
         $userId = Session::getCurrentUserId();
         $tickets = $this->ticketModel->getTicketsByUserId($userId);
-        $viewData = ['tickets' => $tickets]; // Pass tickets to the view
+        $viewData = ['tickets' => $tickets];
         extract($viewData);
         require __DIR__ . '/../templates/tickets/view_my_tickets.php';
     }
@@ -64,7 +64,6 @@ class TicketController {
         }
         $ticket = $this->ticketModel->getTicketByIdAndUserId($ticketId, $userId);
         if (!$ticket) {
-            // Try to see if it's an admin trying to view it via a user link
             if (in_array(Session::getCurrentUserRole(), ['Branch Admin', 'Super Admin'])) {
                  header("Location: index.php?action=admin_view_ticket&id=".$ticketId."&info=redirected_from_user_view");
                  exit;
@@ -72,7 +71,7 @@ class TicketController {
             header("Location: index.php?action=view_my_tickets&error=ticket_not_found"); exit;
         }
 
-        $viewData = $vars; // For error/success messages from addComment
+        $viewData = $vars;
         $viewData['ticket'] = $ticket;
         extract($viewData);
         require __DIR__ . '/../templates/tickets/view_ticket_detail.php';
@@ -98,22 +97,18 @@ class TicketController {
     }
     // END EXISTING USER-FOCUSED METHODS
 
-
     // ---- BRANCH ADMIN / SUPER ADMIN METHODS ----
 
     public function viewBranchTickets() {
         Session::requireRole(['Branch Admin']);
         $userBranch = Session::getCurrentUserBranch();
-
         if (empty($userBranch)) {
             error_log("Branch Admin " . Session::get('username') . " has no branch assigned.");
             header("Location: index.php?action=dashboard&error=admin_branch_not_set");
             exit;
         }
-
         $tickets = $this->ticketModel->getTicketsByBranch($userBranch);
         $currentBranch = $userBranch;
-
         $viewData = [
             'tickets' => $tickets,
             'currentBranch' => $currentBranch
@@ -122,7 +117,7 @@ class TicketController {
         require __DIR__ . '/../templates/admin/branch_tickets_list.php';
     }
 
-    public function showAdminTicketDetail($vars = []) {
+    public function showAdminTicketDetail($vars = []) { // Used by both Super Admin and Branch Admin
         Session::requireRole(['Branch Admin', 'Super Admin']);
         $ticketId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
         $userRole = Session::getCurrentUserRole();
@@ -131,30 +126,35 @@ class TicketController {
         $defaultRedirectAction = ($userRole === 'Super Admin') ? 'admin_all_tickets' : 'admin_branch_tickets';
 
         if (!$ticketId) {
-            header("Location: index.php?action={$defaultRedirectAction}&error=invalid_ticket_id_admin");
+            header("Location: index.php?action={$defaultRedirectAction}&error=invalid_id");
             exit;
         }
 
         $ticket = null;
+        $assignableAdmins = [];
+
         if ($userRole === 'Super Admin') {
             $ticket = $this->ticketModel->getTicketByIdForSuperAdmin($ticketId);
+            $assignableAdmins = $this->userModel->getAllAdmins(); // Super Admin can assign to any admin
         } else { // Branch Admin
             if (empty($userBranch)) {
-                 error_log("Branch Admin ". Session::get('username') ." has no branch assigned for viewing ticket ID: ".$ticketId);
                  header("Location: index.php?action=dashboard&error=missing_branch_data_for_admin_detail");
                  exit;
             }
             $ticket = $this->ticketModel->getTicketByIdForAdmin($ticketId, $userBranch);
+            $assignableAdmins = $this->userModel->getAdminsByBranch($userBranch); // Fetch admins from same branch for BA
         }
 
         if (!$ticket) {
-            header("Location: index.php?action={$defaultRedirectAction}&error=ticket_not_found_or_unauthorized");
+            header("Location: index.php?action={$defaultRedirectAction}&error=not_found_or_unauthorized");
             exit;
         }
 
-        $viewData = $vars; // For error/success messages
+        $viewData = $vars;
         $viewData['ticket'] = $ticket;
         $viewData['allowedStatuses'] = ['Pending', 'In Progress', 'Resolved', 'Closed'];
+        $viewData['assignableAdmins'] = $assignableAdmins; // Pass admins to the view
+
         extract($viewData);
         require __DIR__ . '/../templates/admin/view_ticket_detail_admin.php';
     }
@@ -165,6 +165,8 @@ class TicketController {
             $ticketId = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT);
             $newStatus = $_POST['status'] ?? '';
             $adminCommentInput = trim($_POST['admin_comment'] ?? '');
+            $assignedAdminIdInput = $_POST['assigned_admin_id'] ?? null;
+
             $adminUsername = Session::get('username');
             $userRole = Session::getCurrentUserRole();
             $userBranch = Session::getCurrentUserBranch();
@@ -177,30 +179,58 @@ class TicketController {
                 exit;
             }
 
+            $assignedAdminId = ($assignedAdminIdInput === '' || $assignedAdminIdInput === null) ? null : (int)$assignedAdminIdInput;
+
             $ticketForCheck = null;
             if ($userRole === 'Super Admin') {
                 $ticketForCheck = $this->ticketModel->getTicketByIdForSuperAdmin($ticketId);
             } else {
                  if (empty($userBranch)) {
-                     error_log("Branch Admin ". Session::get('username') ." has no branch assigned for updating ticket ID: ".$ticketId);
                      header("Location: index.php?action=dashboard&error=missing_branch_data_for_admin_update");
                      exit;
                  }
                 $ticketForCheck = $this->ticketModel->getTicketByIdForAdmin($ticketId, $userBranch);
             }
-
             if (!$ticketForCheck) {
                 header("Location: index.php?action={$defaultRedirectAction}&error=unauthorized_or_not_found_for_update");
                 exit;
             }
 
-            if ($this->ticketModel->updateTicketStatusByAdmin($ticketId, $newStatus, $adminUsername, $adminCommentInput)) {
-                header("Location: {$viewTicketAction}&success=ticket_updated_successfully");
-                exit;
-            } else {
-                header("Location: {$viewTicketAction}&error=ticket_update_failed_db");
-                exit;
+            if ($userRole === 'Branch Admin' && $assignedAdminId !== null) {
+                $canAssign = false;
+                if ($assignedAdminId == $ticketForCheck['assigned_admin_id']) {
+                    $canAssign = true;
+                } else {
+                    $adminsInBranch = $this->userModel->getAdminsByBranch($userBranch);
+                    foreach ($adminsInBranch as $admin) {
+                        if ($admin['id'] == $assignedAdminId) {
+                            $canAssign = true;
+                            break;
+                        }
+                    }
+                }
+                if (!$canAssign) {
+                     header("Location: {$viewTicketAction}&error=branch_admin_cannot_assign_to_this_admin");
+                     exit;
+                }
             }
+
+            $statusUpdated = $this->ticketModel->updateTicketStatusByAdmin($ticketId, $newStatus, $adminUsername, $adminCommentInput);
+            $assignmentUpdated = true;
+
+            if ($assignedAdminId !== $ticketForCheck['assigned_admin_id']) {
+                $assignmentUpdated = $this->ticketModel->assignTicket($ticketId, $assignedAdminId);
+            }
+
+            if ($statusUpdated && $assignmentUpdated) {
+                header("Location: {$viewTicketAction}&success=ticket_updated_successfully");
+            } else {
+                $errorMsg = "ticket_update_failed";
+                if (!$statusUpdated) $errorMsg .= "_status";
+                if (!$assignmentUpdated) $errorMsg .= "_assignment";
+                header("Location: {$viewTicketAction}&error=" . $errorMsg);
+            }
+            exit;
         } else {
             $fallbackAction = Session::getCurrentUserRole() === 'Super Admin' ? 'admin_all_tickets' : 'admin_branch_tickets';
             header("Location: index.php?action=" . $fallbackAction);
@@ -214,27 +244,24 @@ class TicketController {
         $userRole = Session::getCurrentUserRole();
         $userBranch = Session::getCurrentUserBranch();
         $usersInScope = [];
-
         if ($userRole === 'Super Admin') {
              if ($userBranch) {
                 $usersInScope = $this->userModel->getUsersByBranch($userBranch);
             } else {
                 $usersInScope = $this->userModel->getAllUsersByRole('User');
             }
-        } else { // Branch Admin
+        } else {
              if (empty($userBranch)) {
                 $this->showErrorPage("Branch information missing for your admin account.");
                 return;
             }
             $usersInScope = $this->userModel->getUsersByBranch($userBranch);
         }
-
         $viewData = $vars;
         $viewData['departments'] = $this->ticketModel->getAllDepartments();
         $viewData['issueTypes'] = $this->ticketModel->getAllIssueTypes();
         $viewData['usersInBranch'] = $usersInScope;
         $viewData['adminCreating'] = true;
-
         extract($viewData);
         require __DIR__ . '/../templates/admin/create_ticket_for_user_form.php';
     }
@@ -248,12 +275,10 @@ class TicketController {
             $issueTypeId = filter_input(INPUT_POST, 'issue_type_id', FILTER_VALIDATE_INT);
             $comment = trim($_POST['comment'] ?? '');
             $originalAdminComment = trim($_POST['admin_initial_comment'] ?? '');
-
             if (empty($selectedUserId) || empty($departmentId) || empty($issueTypeId) || empty($comment)) {
                 $this->showCreateTicketForUserForm(['error' => "User, department, issue type, and issue description are required."]);
                 return;
             }
-
             $userRole = Session::getCurrentUserRole();
             $userBranch = Session::getCurrentUserBranch();
             $canCreateForUser = false;
@@ -272,12 +297,10 @@ class TicketController {
                     }
                 }
             }
-
             if (!$canCreateForUser) {
                  $this->showCreateTicketForUserForm(['error' => "Selected user is not valid or not within your branch."]);
                  return;
             }
-
             $ticketComment = "Ticket created by Admin: {$adminUsername} on behalf of user.
 User's Issue: " . $comment;
             if(!empty($originalAdminComment)){
@@ -286,7 +309,6 @@ User's Issue: " . $comment;
 --- Admin Initial Note ({$adminUsername} - " . date('Y-m-d H:i:s') . ") ---
 " . $originalAdminComment;
             }
-
             if ($this->ticketModel->createTicket($selectedUserId, $departmentId, $issueTypeId, $ticketComment)) {
                 $this->showCreateTicketForUserForm(['success' => "Ticket created successfully for the user!"]);
             } else {

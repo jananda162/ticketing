@@ -56,15 +56,8 @@ class SuperAdminController {
     }
 
     // ... (existing listAllTickets, Issue Type Management methods) ...
-    // ensureDirExists might be redundant if called in constructor or each method that needs it,
-    // but it's harmless. Let's assume it's fine or refactor later if desired.
-    private function ensureDirExists(string $directoryPath): void {
-        if (!is_dir($directoryPath)) {
-            if (!mkdir($directoryPath, 0755, true) && !is_dir($directoryPath)) {
-                error_log("Failed to create directory: " . $directoryPath);
-            }
-        }
-    }
+    // The ensureDirExists method is defined after the dashboard method and will be kept there.
+    // Removing the duplicate definition that appeared after deleteIssueType.
 
     // ---- Issue Type Management ----
     public function listIssueTypes() {
@@ -179,15 +172,6 @@ class SuperAdminController {
         }
     }
 
-    private function ensureDirExists(string $directoryPath): void {
-        if (!is_dir($directoryPath)) {
-            if (!mkdir($directoryPath, 0755, true) && !is_dir($directoryPath)) {
-                // Log error or throw exception if directory creation fails
-                error_log("Failed to create directory: " . $directoryPath);
-            }
-        }
-    }
-
     // ---- Department Management ----
     public function listDepartments() {
         $departments = $this->departmentModel->getAll();
@@ -298,7 +282,7 @@ class SuperAdminController {
         }
     }
 
-    // ensureDirExists method is already present from previous step
+    // ensureDirExists method is defined earlier in the class.
 
         // ---- User Management ----
         public function listUsers() {

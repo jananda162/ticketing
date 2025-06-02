@@ -9,7 +9,6 @@ class TicketModel {
         $this->db = Database::getInstance()->getConnection();
     }
 
-    // START EXISTING METHODS (assumed to be present and correct)
     public function getAllDepartments() {
         $stmt = $this->db->query("SELECT id, name FROM departments ORDER BY name ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -23,6 +22,7 @@ class TicketModel {
     public function createTicket(int $userId, int $departmentId, int $issueTypeId, string $comment): bool {
         $sql = "INSERT INTO tickets (user_id, department_id, issue_type_id, comment)
                 VALUES (:user_id, :department_id, :issue_type_id, :comment)";
+        // assigned_admin_id will be NULL by default due to schema
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
         $stmt->bindParam(':department_id', $departmentId, PDO::PARAM_INT);
@@ -31,11 +31,20 @@ class TicketModel {
         return $stmt->execute();
     }
 
+    public function assignTicket(int $ticketId, ?int $adminId): bool {
+        $sql = "UPDATE tickets SET assigned_admin_id = :admin_id, updated_at = NOW() WHERE id = :ticket_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':admin_id', $adminId, $adminId === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+        $stmt->bindParam(':ticket_id', $ticketId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
     public function getTicketsByUserId(int $userId) {
-        $sql = "SELECT t.id, d.name as department_name, it.name as issue_type_name, t.comment, t.status, t.created_at
+        $sql = "SELECT t.id, d.name as department_name, it.name as issue_type_name, t.comment, t.status, t.created_at, t.assigned_admin_id, aa.username as assigned_admin_username
                 FROM tickets t
                 JOIN departments d ON t.department_id = d.id
                 JOIN issue_types it ON t.issue_type_id = it.id
+                LEFT JOIN users aa ON t.assigned_admin_id = aa.id
                 WHERE t.user_id = :user_id
                 ORDER BY t.created_at DESC";
         $stmt = $this->db->prepare($sql);
@@ -45,10 +54,11 @@ class TicketModel {
     }
 
     public function getTicketByIdAndUserId(int $ticketId, int $userId) {
-        $sql = "SELECT t.id, t.user_id, d.name as department_name, it.name as issue_type_name, t.comment, t.status, t.created_at, t.updated_at
+        $sql = "SELECT t.id, t.user_id, d.name as department_name, it.name as issue_type_name, t.comment, t.status, t.created_at, t.updated_at, t.assigned_admin_id, aa.username as assigned_admin_username
                 FROM tickets t
                 JOIN departments d ON t.department_id = d.id
                 JOIN issue_types it ON t.issue_type_id = it.id
+                LEFT JOIN users aa ON t.assigned_admin_id = aa.id
                 WHERE t.id = :ticket_id AND t.user_id = :user_id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':ticket_id', $ticketId, PDO::PARAM_INT);
@@ -58,7 +68,7 @@ class TicketModel {
     }
 
     public function addCommentToTicket(int $ticketId, int $userId, string $newComment): bool {
-        $ticket = $this->getTicketByIdAndUserId($ticketId, $userId);
+        $ticket = $this->getTicketByIdAndUserId($ticketId, $userId); // This will now fetch assigned_admin_username, but not used here
         if (!$ticket) return false;
         if (!in_array($ticket['status'], ['Pending', 'In Progress'])) {
             error_log("User tried to comment on a ticket with status: " . $ticket['status']);
@@ -76,15 +86,14 @@ class TicketModel {
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
         return $stmt->execute();
     }
-    // END EXISTING METHODS
 
-    // ---- NEW METHODS FOR ADMIN FUNCTIONALITY ----
     public function getTicketsByBranch(string $branch) {
-        $sql = "SELECT t.id, u.username as user_username, d.name as department_name, it.name as issue_type_name, t.status, t.created_at, t.updated_at
+        $sql = "SELECT t.id, u.username as user_username, d.name as department_name, it.name as issue_type_name, t.status, t.created_at, t.updated_at, t.assigned_admin_id, aa.username as assigned_admin_username
                 FROM tickets t
                 JOIN users u ON t.user_id = u.id
                 JOIN departments d ON t.department_id = d.id
                 JOIN issue_types it ON t.issue_type_id = it.id
+                LEFT JOIN users aa ON t.assigned_admin_id = aa.id
                 WHERE u.branch = :branch
                 ORDER BY t.updated_at DESC, t.created_at DESC";
         $stmt = $this->db->prepare($sql);
@@ -96,11 +105,12 @@ class TicketModel {
     public function getTicketByIdForAdmin(int $ticketId, string $branchName) {
         $sql = "SELECT t.id, t.user_id, u.username as user_username, u.branch as user_branch,
                        d.name as department_name, it.name as issue_type_name,
-                       t.comment, t.status, t.created_at, t.updated_at
+                       t.comment, t.status, t.created_at, t.updated_at, t.assigned_admin_id, aa.username as assigned_admin_username
                 FROM tickets t
                 JOIN users u ON t.user_id = u.id
                 JOIN departments d ON t.department_id = d.id
                 JOIN issue_types it ON t.issue_type_id = it.id
+                LEFT JOIN users aa ON t.assigned_admin_id = aa.id
                 WHERE t.id = :ticket_id AND u.branch = :branch_name";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':ticket_id', $ticketId, PDO::PARAM_INT);
@@ -110,16 +120,14 @@ class TicketModel {
     }
 
     public function getTicketByIdForSuperAdmin(int $ticketId) {
-        // This method is actually not strictly needed if getAllTicketsAdmin handles ID filter,
-        // but keeping it if it's used elsewhere or for very specific non-filtered single ticket view by SA.
-        // The prompt for SuperAdminController dashboard uses getAllTicketsAdmin with a limit, not this.
         $sql = "SELECT t.id, t.user_id, u.username as user_username, u.branch as user_branch,
                        d.name as department_name, it.name as issue_type_name,
-                       t.comment, t.status, t.created_at, t.updated_at
+                       t.comment, t.status, t.created_at, t.updated_at, t.assigned_admin_id, aa.username as assigned_admin_username
                 FROM tickets t
                 JOIN users u ON t.user_id = u.id
                 JOIN departments d ON t.department_id = d.id
                 JOIN issue_types it ON t.issue_type_id = it.id
+                LEFT JOIN users aa ON t.assigned_admin_id = aa.id
                 WHERE t.id = :ticket_id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':ticket_id', $ticketId, PDO::PARAM_INT);
@@ -151,7 +159,7 @@ class TicketModel {
         if (!empty($adminCommentInput)) {
              if(empty($commentUpdate) && $currentStatus === $newStatus) {
                 $commentUpdate .= "\n\n--- Admin Comment ({$adminUsername} - {$timestamp}) ---";
-             } elseif (empty($commentUpdate) && $currentStatus !== $newStatus) {
+             } elseif (empty($commentUpdate) && $currentStatus !== $newStatus) { // Should not happen given the logic for status change
                 $commentUpdate .= "\n--- Admin Comment ({$adminUsername} - {$timestamp}) ---";
              }
              $commentUpdate .= "\nAdmin Comment: " . trim($adminCommentInput);
@@ -160,10 +168,10 @@ class TicketModel {
         if ($currentStatus === $newStatus && empty(trim($adminCommentInput))) {
             return true;
         }
-        $sql = "UPDATE tickets SET status = :status, comment = :comment, updated_at = NOW() WHERE id = :ticket_id";
+        $sql = "UPDATE tickets SET comment = :comment, status = :status, updated_at = NOW() WHERE id = :ticket_id";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':status', $newStatus);
         $stmt->bindParam(':comment', $finalComment);
+        $stmt->bindParam(':status', $newStatus);
         $stmt->bindParam(':ticket_id', $ticketId, PDO::PARAM_INT);
         return $stmt->execute();
     }
@@ -202,18 +210,18 @@ class TicketModel {
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    // This is the method used by SuperAdminController->listAllTickets and also for the dashboard's recent tickets.
     public function getAllTicketsAdmin(array $filters = []): array {
         $sql = "SELECT t.id, u.username as user_username, u.branch as user_branch,
                        d.name as department_name, it.name as issue_type_name,
-                       t.comment, t.status, t.created_at, t.updated_at
+                       t.comment, t.status, t.created_at, t.updated_at, t.assigned_admin_id, aa.username as assigned_admin_username
                 FROM tickets t
                 JOIN users u ON t.user_id = u.id
                 JOIN departments d ON t.department_id = d.id
-                JOIN issue_types it ON t.issue_type_id = it.id";
+                JOIN issue_types it ON t.issue_type_id = it.id
+                LEFT JOIN users aa ON t.assigned_admin_id = aa.id";
 
         $whereClauses = [];
-        $params = []; // Renamed from $bindings to $params for clarity with PDOStatement::execute
+        $params = [];
 
         if (!empty($filters['branch'])) {
             $whereClauses[] = "u.branch = :branch";
@@ -232,11 +240,11 @@ class TicketModel {
             $params[':issue_type_id'] = (int)$filters['issue_type_id'];
         }
         if (!empty($filters['date_from'])) {
-            $whereClauses[] = "DATE(t.created_at) >= :date_from"; // Compare date part
+            $whereClauses[] = "DATE(t.created_at) >= :date_from";
             $params[':date_from'] = $filters['date_from'];
         }
         if (!empty($filters['date_to'])) {
-            $whereClauses[] = "DATE(t.created_at) <= :date_to"; // Compare date part
+            $whereClauses[] = "DATE(t.created_at) <= :date_to";
             $params[':date_to'] = $filters['date_to'];
         }
         if (!empty($filters['search_term'])) {
@@ -254,17 +262,11 @@ class TicketModel {
 
         $sql .= " ORDER BY t.updated_at DESC, t.created_at DESC";
 
-        // Apply limit if provided (e.g., for recent tickets on dashboard)
         if (!empty($filters['limit_sql']) && is_string($filters['limit_sql'])) {
-             // Directly append a trusted SQL snippet like "LIMIT 5"
-             // This assumes 'limit_sql' is constructed safely in the controller
              $sql .= " " . $filters['limit_sql'];
         }
 
         $stmt = $this->db->prepare($sql);
-        // PDOStatement::execute can take an array of parameters, simplifying binding for basic cases.
-        // Explicit bindParam/bindValue is needed for specific type control (like PDO::PARAM_INT) or when dealing with LOBs.
-        // For this usage, execute($params) should be fine as types are generally handled well by PDO for strings/ints.
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

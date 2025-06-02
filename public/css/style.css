@@ -263,3 +263,63 @@ table.report-table tfoot th, table.report-table tfoot td {
     color: #fff;
     text-decoration: none;
 }
+
+/* --- Filter Form Specifics --- */
+.filters-form {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+}
+.filters-form h3 {
+    margin-top: 0;
+    width: 100%; /* Make h3 span full width before form groups */
+    margin-bottom: 15px;
+}
+.filters-form .form-row { /* Optional: for grouping filter elements in rows */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end; /* Align items in a row to their bottom */
+    margin-bottom: 10px;
+}
+.filters-form .form-group {
+    margin-bottom: 10px;
+    min-width: 200px;
+    vertical-align: top;
+    display: flex;
+    flex-direction: column;
+}
+.filters-form .form-group label {
+    font-weight: normal;
+    margin-bottom:3px;
+    font-size: 0.9em;
+}
+.filters-form select,
+.filters-form input[type="date"],
+.filters-form input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    font-size:0.95em;
+}
+.filters-form .actions-group { /* For Filter and Clear buttons */
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.filters-form button {
+    padding: 8px 15px;
+}
+.filters-form a.clear-filters-btn {
+    padding: 8px 15px;
+    background-color: #6c757d;
+    color:white;
+    border-radius:5px;
+    text-decoration:none;
+    height: fit-content;
+    line-height: normal;
+}

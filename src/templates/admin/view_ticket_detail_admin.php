@@ -41,6 +41,7 @@
             <p><strong>Department:</strong> <?php echo htmlspecialchars($ticket['department_name']); ?></p>
             <p><strong>Issue Type:</strong> <?php echo htmlspecialchars($ticket['issue_type_name']); ?></p>
             <p><strong>Current Status:</strong> <?php echo htmlspecialchars($ticket['status']); ?></p>
+                <p><strong>Assigned To:</strong> <?php echo htmlspecialchars($ticket['assigned_admin_username'] ?? 'Unassigned'); ?></p> <!-- New Display -->
             <p><strong>Submitted:</strong> <?php echo htmlspecialchars($ticket['created_at']); ?></p>
             <p><strong>Last Updated:</strong> <?php echo htmlspecialchars($ticket['updated_at']); ?></p>
             <p><strong>Details/Comments Log:</strong></p>
@@ -58,6 +59,19 @@
                             <?php echo $statusValue; ?>
                         </option>
                     <?php endforeach; ?>
+                    </select>
+                </div>
+                <div> <!-- New Assignment Dropdown -->
+                    <label for="assigned_admin_id">Assign To:</label>
+                    <select id="assigned_admin_id" name="assigned_admin_id">
+                        <option value="">-- Unassign --</option>
+                        <?php if (!empty($assignableAdmins)): ?>
+                            <?php foreach ($assignableAdmins as $admin): ?>
+                                <option value="<?php echo htmlspecialchars($admin['id']); ?>" <?php echo (($ticket['assigned_admin_id'] ?? null) == $admin['id']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($admin['username']); ?> (<?php echo htmlspecialchars($admin['role']); ?> - <?php echo htmlspecialchars($admin['branch']); ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                 </select>
             </div>
             <div>
