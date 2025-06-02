@@ -22,6 +22,14 @@ class SuperAdminController {
         $this->departmentModel = new DepartmentModel(); // Instantiate
     }
 
+    private function ensureDirExists(string $directoryPath): void {
+        if (!is_dir($directoryPath)) {
+            if (!mkdir($directoryPath, 0755, true) && !is_dir($directoryPath)) {
+                error_log("Failed to create directory: " . $directoryPath);
+            }
+        }
+    }
+
     public function dashboard() {
         $adminUsername = Session::get('username');
 
@@ -56,8 +64,8 @@ class SuperAdminController {
     }
 
     // ... (existing listAllTickets, Issue Type Management methods) ...
-    // The ensureDirExists method is defined after the dashboard method and will be kept there.
-    // Removing the duplicate definition that appeared after deleteIssueType.
+    // The ensureDirExists method is now defined after the constructor.
+    // No other definitions of this method exist in the class.
 
     // ---- Issue Type Management ----
     public function listIssueTypes() {
